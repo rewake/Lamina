@@ -44,7 +44,6 @@ class Debug
     public function backtrace($formatted = true)
     {
         self::getInstance();
-
         $bt = debug_backtrace();
         $returnArray = array();
 
@@ -57,7 +56,6 @@ class Debug
         }
 
         $returnString = implode("\n", $returnArray);
-
         self::queue("Backtrace", $returnString);
 
         return self::$instance;
@@ -72,7 +70,6 @@ class Debug
     public function info($input, $title = NULL)
     {
         self::getInstance();
-
         $title = !is_null($title) && !empty($title) ? $title : self::$instance->_defaultDumpTitle;
         self::queue($title, $input);
 
@@ -88,7 +85,6 @@ class Debug
     public function email($emailAddress, $subject = NULL)
     {
         self::getInstance();
-
         $subject = is_null($subject) ? self::$instance->_defaultEmailSubject : $subject ;
 
         mail(
@@ -108,7 +104,6 @@ class Debug
     public function version()
     {
         self::getInstance();
-
         self::queue("PHP Version", phpversion());
 
         return self::$instance;
@@ -121,7 +116,6 @@ class Debug
     public function server()
     {
         self::getInstance();
-
         $returnArray = array();
 
         foreach ($_SERVER as $k => $v) {
@@ -129,7 +123,6 @@ class Debug
         }
 
         $returnString = implode("\n", $returnArray);
-
         self::queue("Server Info", $returnString);
 
         return self::$instance;
@@ -142,7 +135,6 @@ class Debug
     public function request()
     {
         self::getInstance();
-
         self::queue("REQUEST Data", $_REQUEST);
 
         return self::$instance;
@@ -155,7 +147,6 @@ class Debug
     public function get()
     {
         self::getInstance();
-
         self::queue("GET Data", $_GET);
 
         return self::$instance;
@@ -168,7 +159,6 @@ class Debug
     public function post()
     {
         self::getInstance();
-
         self::queue("POST Data", $_POST);
 
         return self::$instance;
@@ -181,7 +171,6 @@ class Debug
     public function session()
     {
         self::getInstance();
-
         self::queue("Session Data", $_SESSION);
 
         return self::$instance;
@@ -203,7 +192,6 @@ class Debug
     public function extension($ext)
     {
         self::getInstance();
-
         $loaded = extension_loaded($ext) ? "TRUE" : "FALSE";
         self::queue("Extension Loaded", "{$ext}: {$loaded}");
 
@@ -220,7 +208,6 @@ class Debug
     public function test($test, &$return, $message = null)
     {
         self::getInstance();
-
         $message = is_null($message) || empty($message) ? "Test Failure" : $message ;
 
         if (!$return = $test) {
@@ -294,7 +281,6 @@ class Debug
     protected function queue($title, $output)
     {
         self::getInstance();
-
         self::$instance->_queue[] = array('title' => $title, 'output' => $output);
     }
 
@@ -309,7 +295,15 @@ class Debug
         self::getInstance();
 
         // Reformat $output
-        $output = print_r(self::showNullOrEmpty($output), true);
+        if (is_null($output)) {
+            $output = "[NULL]";
+        }
+        else if (empty($output)) {
+            $output = "[EMPTY]";
+        }
+        else {
+            $output = print_r($output, true);
+        }
 
         // Format the output string to show
         // TODO: it would be nice if formatting was not in the class itself, but I guess it works for the purpose
@@ -333,23 +327,6 @@ EOL;
         return $_outString;
     }
 
-
-    //-------------------------------
-    // Private Functions
-    //-------------------------------
-    // TODO: this may be better off in a common class, or just not used within other methods in this class.
-    private function showNullOrEmpty($i)
-    {
-        if (is_null($i)) {
-            return "[NULL]";
-        }
-        else if (empty($i)) {
-            return "[EMPTY]";
-        }
-        else {
-            return $i;
-        }
-    }
 }
 
 
